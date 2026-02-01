@@ -54,7 +54,10 @@ def run(
 
 
 if __name__ == "__main__":
+    import os
     from pathlib import Path
+
+    from dotenv import load_dotenv
 
     from much_miller.wake_word.adapters import (
         HttpTranscriber,
@@ -62,7 +65,8 @@ if __name__ == "__main__":
         SoundDeviceRecorder,
     )
 
-    model_path = Path(__file__).parent.parent.parent / "models" / "en_GB-alan-medium.onnx"
+    load_dotenv()
+    model_path = Path(os.environ["MUCH_MILLER_MODEL_PATH"])
     recorder = SoundDeviceRecorder(device=1)
     transcriber = HttpTranscriber()
     speaker = PiperSpeaker(model_path=model_path)
