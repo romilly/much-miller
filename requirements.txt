@@ -4,5 +4,6 @@ numpy
 httpx
 scipy
 matplotlib
+piper-tts
 
 # Development dependencies are in requirements-test.txt

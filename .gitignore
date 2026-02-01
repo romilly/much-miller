@@ -135,3 +135,6 @@ test/test/data/generated
 
 Link.md
 
+# Voice models (large binary files)
+models/
+
