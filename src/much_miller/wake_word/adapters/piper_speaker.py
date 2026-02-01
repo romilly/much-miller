@@ -32,8 +32,8 @@ class PiperSpeaker(SpeakerPort):
             audio_segments.append(chunk.audio_int16_bytes)
 
         if audio_segments:
-            # Add 200ms silence at start to allow audio device to initialize
-            silence_samples = int(self._voice.config.sample_rate * 0.2)
+            # Add 500ms silence at start to allow audio device to initialize
+            silence_samples = int(self._voice.config.sample_rate * 0.5)
             silence = b"\x00\x00" * silence_samples  # 16-bit silence
             audio_data = silence + b"".join(audio_segments)
             wav_bytes = self._to_wav(audio_data)
