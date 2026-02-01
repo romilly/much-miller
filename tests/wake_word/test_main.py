@@ -3,7 +3,7 @@
 from hamcrest import assert_that, is_
 
 from much_miller.wake_word.adapters import FakeRecorder, FakeTranscriber
-from much_miller.wake_word.main import process_audio_chunk
+from much_miller.main import process_audio_chunk
 
 
 class TestProcessAudioChunk:
@@ -11,7 +11,7 @@ class TestProcessAudioChunk:
 
     def test_returns_true_when_wake_word_detected(self) -> None:
         recorder = FakeRecorder(wav_bytes=b"fake wav data")
-        transcriber = FakeTranscriber(response="hey much what time is it")
+        transcriber = FakeTranscriber(response="figaro what time is it")
 
         result = process_audio_chunk(recorder, transcriber)
 

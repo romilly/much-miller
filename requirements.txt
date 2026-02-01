@@ -3,5 +3,6 @@ sounddevice
 numpy
 httpx
 scipy
+matplotlib
 
 # Development dependencies are in requirements-test.txt

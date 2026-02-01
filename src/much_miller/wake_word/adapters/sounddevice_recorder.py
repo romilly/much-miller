@@ -12,8 +12,9 @@ from much_miller.wake_word.ports import AudioRecorderPort
 class SoundDeviceRecorder(AudioRecorderPort):
     """Audio recorder that captures from microphone using sounddevice."""
 
-    def __init__(self, sample_rate: int = 16000) -> None:
+    def __init__(self, sample_rate: int = 16000, device: int | None = None) -> None:
         self.sample_rate = sample_rate
+        self.device = device
 
     def record_chunk(self, duration_seconds: float) -> bytes:
         """Record a chunk of audio from the microphone.
@@ -30,6 +31,7 @@ class SoundDeviceRecorder(AudioRecorderPort):
             samplerate=self.sample_rate,
             channels=1,
             dtype=np.int16,
+            device=self.device,
         )
         sd.wait()
 

@@ -1,6 +1,6 @@
 """Domain logic for wake word detection."""
 
-WAKE_WORD = "hey much"
+WAKE_WORD = "figaro"
 
 
 def contains_wake_word(text: str) -> bool:

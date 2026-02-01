@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Wake word detection orchestration."""
 
 from much_miller.wake_word.detector import contains_wake_word
@@ -21,6 +22,8 @@ def process_audio_chunk(
     """
     audio = recorder.record_chunk(duration_seconds)
     text = transcriber.transcribe(audio)
+    if text:
+        print(f"Heard: '{text}'")
     return contains_wake_word(text)
 
 
@@ -34,10 +37,18 @@ def run(
         recorder: Audio recorder adapter
         transcriber: Speech-to-text transcriber adapter
     """
-    print("Listening for 'hey much'...")
+    print("Listening for 'figaro'...")
     try:
         while True:
             if process_audio_chunk(recorder, transcriber):
                 print("Wake word detected!")
     except KeyboardInterrupt:
         print("\nStopping.")
+
+
+if __name__ == "__main__":
+    from much_miller.wake_word.adapters import HttpTranscriber, SoundDeviceRecorder
+
+    recorder = SoundDeviceRecorder(device=1)
+    transcriber = HttpTranscriber()
+    run(recorder, transcriber)

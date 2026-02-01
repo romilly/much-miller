@@ -292,6 +292,17 @@ The name comes from Much the Miller's Son, one of Robin Hood's Merry Men - a loy
 ### First Milestone
 Voice control of music library and Radio 3/4 - contained scope, immediate daily value, exercises the core pipeline.
 
+## Running the Wake Word Detector
+
+Requires the transcriber service running on localhost:8765.
+
+```bash
+source venv/bin/activate
+python -m much_miller.main
+```
+
+Press Ctrl+C to stop.
+
 ---
 
 
