@@ -2,7 +2,12 @@
 
 from hamcrest import assert_that, contains_string, is_
 
-from much_miller.wake_word.adapters import FakeRecorder, FakeSpeaker, FakeTranscriber
+from much_miller.wake_word.adapters import (
+    FakeRecorder,
+    FakeSpeaker,
+    FakeTranscriber,
+    FakeVoiceDetector,
+)
 from much_miller.main import process_audio_chunk
 
 
@@ -33,3 +38,14 @@ class TestProcessAudioChunk:
         process_audio_chunk(recorder, transcriber, speaker=speaker)
 
         assert_that(speaker.spoken_text, contains_string("Hello Romilly"))
+
+    def test_skips_transcription_when_no_speech_detected(self) -> None:
+        recorder = FakeRecorder(wav_bytes=b"fake wav data")
+        transcriber = FakeTranscriber(response="figaro")  # Would match if called
+        voice_detector = FakeVoiceDetector(has_speech=False)
+
+        result = process_audio_chunk(
+            recorder, transcriber, voice_detector=voice_detector
+        )
+
+        assert_that(result, is_(False))

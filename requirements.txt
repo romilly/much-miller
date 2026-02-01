@@ -6,5 +6,6 @@ scipy
 matplotlib
 piper-tts
 python-dotenv
+webrtcvad
 
 # Development dependencies are in requirements-test.txt

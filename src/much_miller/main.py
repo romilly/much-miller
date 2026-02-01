@@ -2,7 +2,12 @@
 """Wake word detection orchestration."""
 
 from much_miller.wake_word.detector import contains_wake_word
-from much_miller.wake_word.ports import AudioRecorderPort, SpeakerPort, TranscriberPort
+from much_miller.wake_word.ports import (
+    AudioRecorderPort,
+    SpeakerPort,
+    TranscriberPort,
+    VoiceDetectorPort,
+)
 
 
 def process_audio_chunk(
@@ -10,6 +15,7 @@ def process_audio_chunk(
     transcriber: TranscriberPort,
     duration_seconds: float = 2.0,
     speaker: SpeakerPort | None = None,
+    voice_detector: VoiceDetectorPort | None = None,
 ) -> bool:
     """Record audio, transcribe it, and check for wake word.
 
@@ -18,11 +24,17 @@ def process_audio_chunk(
         transcriber: Speech-to-text transcriber adapter
         duration_seconds: Duration to record
         speaker: Optional speaker for TTS response
+        voice_detector: Optional VAD to skip silent audio
 
     Returns:
         True if wake word detected, False otherwise
     """
     audio = recorder.record_chunk(duration_seconds)
+
+    # Skip transcription if no speech detected
+    if voice_detector is not None and not voice_detector.contains_speech(audio):
+        return False
+
     text = transcriber.transcribe(audio)
     if text:
         print(f"Heard: '{text}'")
@@ -36,6 +48,7 @@ def run(
     recorder: AudioRecorderPort,
     transcriber: TranscriberPort,
     speaker: SpeakerPort | None = None,
+    voice_detector: VoiceDetectorPort | None = None,
 ) -> None:
     """Run the wake word detection loop.
 
@@ -43,11 +56,14 @@ def run(
         recorder: Audio recorder adapter
         transcriber: Speech-to-text transcriber adapter
         speaker: Optional speaker for TTS response
+        voice_detector: Optional VAD to skip silent audio
     """
     print("Listening for 'figaro'...")
     try:
         while True:
-            if process_audio_chunk(recorder, transcriber, speaker=speaker):
+            if process_audio_chunk(
+                recorder, transcriber, speaker=speaker, voice_detector=voice_detector
+            ):
                 print("Wake word detected!")
     except KeyboardInterrupt:
         print("\nStopping.")
@@ -63,6 +79,7 @@ if __name__ == "__main__":
         HttpTranscriber,
         PiperSpeaker,
         SoundDeviceRecorder,
+        WebRtcVoiceDetector,
     )
 
     load_dotenv()
@@ -71,4 +88,5 @@ if __name__ == "__main__":
     recorder = SoundDeviceRecorder(device=1)
     transcriber = HttpTranscriber(base_url=transcriber_url)
     speaker = PiperSpeaker(model_path=model_path)
-    run(recorder, transcriber, speaker=speaker)
+    voice_detector = WebRtcVoiceDetector()
+    run(recorder, transcriber, speaker=speaker, voice_detector=voice_detector)
