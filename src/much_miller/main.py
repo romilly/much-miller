@@ -92,10 +92,15 @@ if __name__ == "__main__":
     model_path = Path(os.environ["MUCH_MILLER_MODEL_PATH"])
     transcriber_url = os.environ.get("MUCH_MILLER_TRANSCRIBER_URL", "http://localhost:8765")
     record_duration = float(os.environ.get("MUCH_MILLER_RECORD_DURATION", "2.0"))
+    vad_aggressiveness = int(os.environ.get("MUCH_MILLER_VAD_AGGRESSIVENESS", "2"))
+    vad_speech_threshold = float(os.environ.get("MUCH_MILLER_VAD_SPEECH_THRESHOLD", "0.3"))
     recorder = SoundDeviceRecorder(device=1)
     transcriber = HttpTranscriber(base_url=transcriber_url)
     speaker = PiperSpeaker(model_path=model_path)
-    voice_detector = WebRtcVoiceDetector()
+    voice_detector = WebRtcVoiceDetector(
+        aggressiveness=vad_aggressiveness,
+        speech_threshold=vad_speech_threshold,
+    )
     run(
         recorder,
         transcriber,
