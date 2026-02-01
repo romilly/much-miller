@@ -28,7 +28,7 @@ def process_audio_chunk(
         print(f"Heard: '{text}'")
     detected = contains_wake_word(text)
     if detected and speaker is not None:
-        speaker.say("Yes?")
+        speaker.say("Hello Romilly")
     return detected
 
 

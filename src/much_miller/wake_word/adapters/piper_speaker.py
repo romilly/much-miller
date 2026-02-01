@@ -1,16 +1,13 @@
 """Piper TTS speaker adapter."""
 
+import io
+import subprocess
+import wave
 from pathlib import Path
-from typing import TYPE_CHECKING
 
-import numpy as np
-import sounddevice as sd
 from piper import PiperVoice
 
 from much_miller.wake_word.ports import SpeakerPort
-
-if TYPE_CHECKING:
-    from numpy.typing import NDArray
 
 
 class PiperSpeaker(SpeakerPort):
@@ -30,12 +27,24 @@ class PiperSpeaker(SpeakerPort):
         Args:
             text: Text to speak
         """
-        audio_segments: list[NDArray[np.int16]] = []
+        audio_segments: list[bytes] = []
         for chunk in self._voice.synthesize(text):
-            audio_segment = np.frombuffer(chunk.audio_int16_bytes, dtype=np.int16)
-            audio_segments.append(audio_segment)
+            audio_segments.append(chunk.audio_int16_bytes)
 
         if audio_segments:
-            audio_data = np.concatenate(audio_segments)
-            sd.play(audio_data, samplerate=self._voice.config.sample_rate)
-            sd.wait()
+            # Add 200ms silence at start to allow audio device to initialize
+            silence_samples = int(self._voice.config.sample_rate * 0.2)
+            silence = b"\x00\x00" * silence_samples  # 16-bit silence
+            audio_data = silence + b"".join(audio_segments)
+            wav_bytes = self._to_wav(audio_data)
+            subprocess.run(["aplay", "-q", "-"], input=wav_bytes, check=True)
+
+    def _to_wav(self, audio_data: bytes) -> bytes:
+        """Convert raw audio bytes to WAV format."""
+        wav_buffer = io.BytesIO()
+        with wave.open(wav_buffer, "wb") as wav_file:
+            wav_file.setnchannels(1)
+            wav_file.setsampwidth(2)  # 16-bit
+            wav_file.setframerate(self._voice.config.sample_rate)
+            wav_file.writeframes(audio_data)
+        return wav_buffer.getvalue()
