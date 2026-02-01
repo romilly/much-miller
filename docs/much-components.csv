@@ -1,0 +1,11 @@
+Project,URL,Status,Description
+video-transcriber,https://github.com/romilly/video-transcriber,Published on PyPI,Extracts visually distinct frames from videos and transcribes audio using Whisper
+video-transcriber-gui,https://github.com/romilly/video-transcriber-gui,Published on PyPI,Textual-based TUI wrapper for video-transcriber
+the-great-dictator,https://github.com/romilly/great-dictator,In development,Browser-based dictation app for family use with GPU-accelerated STT
+watcher-on-the-Pi,https://github.com/romilly/watcher-on-the-pi,Planned,Pi-based system to transcribe free-to-air TV broadcasts
+gmail_reader,https://github.com/romilly/gmail_reader,In use,Python library for reading Gmail via API and storing in PostgreSQL
+John Dee,https://github.com/romilly/john-dee,In use,FastAPI web app for searching personal knowledge stores (Logseq)
+arXiv Librarian,https://github.com/romilly/arxiv-librarian,In production,Monitors and summarizes research papers from arXiv and bioRxiv
+s2ag-corpus,https://github.com/romilly/s2ag-corpus,In production,Imports Semantic Scholar Academic Graph (220M+ papers) into PostgreSQL
+s2ag-web-researcher,https://github.com/romilly/s2ag-web-researcher,In development,Web interface for accessing and caching S2AG data
+Much,https://github.com/romilly/much-miller,Planned (long-term),Local voice assistant with legitimate API integrations
