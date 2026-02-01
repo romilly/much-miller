@@ -67,7 +67,8 @@ if __name__ == "__main__":
 
     load_dotenv()
     model_path = Path(os.environ["MUCH_MILLER_MODEL_PATH"])
+    transcriber_url = os.environ.get("MUCH_MILLER_TRANSCRIBER_URL", "http://localhost:8765")
     recorder = SoundDeviceRecorder(device=1)
-    transcriber = HttpTranscriber()
+    transcriber = HttpTranscriber(base_url=transcriber_url)
     speaker = PiperSpeaker(model_path=model_path)
     run(recorder, transcriber, speaker=speaker)
