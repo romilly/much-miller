@@ -1,4 +1,7 @@
 # Production dependencies
-# Add your dependencies here
+sounddevice
+numpy
+httpx
+scipy
 
 # Development dependencies are in requirements-test.txt
