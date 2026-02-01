@@ -4,10 +4,12 @@ from much_miller.wake_word.adapters.http_transcriber import HttpTranscriber
 from much_miller.wake_word.adapters.fake_transcriber import FakeTranscriber
 from much_miller.wake_word.adapters.sounddevice_recorder import SoundDeviceRecorder
 from much_miller.wake_word.adapters.fake_recorder import FakeRecorder
+from much_miller.wake_word.adapters.fake_speaker import FakeSpeaker
 
 __all__ = [
     "HttpTranscriber",
     "FakeTranscriber",
     "SoundDeviceRecorder",
     "FakeRecorder",
+    "FakeSpeaker",
 ]

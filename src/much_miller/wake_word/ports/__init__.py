@@ -2,5 +2,6 @@
 
 from much_miller.wake_word.ports.transcriber import TranscriberPort
 from much_miller.wake_word.ports.audio_recorder import AudioRecorderPort
+from much_miller.wake_word.ports.speaker import SpeakerPort
 
-__all__ = ["TranscriberPort", "AudioRecorderPort"]
+__all__ = ["TranscriberPort", "AudioRecorderPort", "SpeakerPort"]
