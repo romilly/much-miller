@@ -1,8 +1,8 @@
 """Tests for wake word detection orchestration."""
 
-from hamcrest import assert_that, is_
+from hamcrest import assert_that, contains_string, is_
 
-from much_miller.wake_word.adapters import FakeRecorder, FakeTranscriber
+from much_miller.wake_word.adapters import FakeRecorder, FakeSpeaker, FakeTranscriber
 from much_miller.main import process_audio_chunk
 
 
@@ -24,3 +24,12 @@ class TestProcessAudioChunk:
         result = process_audio_chunk(recorder, transcriber)
 
         assert_that(result, is_(False))
+
+    def test_says_yes_when_wake_word_detected(self) -> None:
+        recorder = FakeRecorder(wav_bytes=b"fake wav data")
+        transcriber = FakeTranscriber(response="figaro")
+        speaker = FakeSpeaker()
+
+        process_audio_chunk(recorder, transcriber, speaker=speaker)
+
+        assert_that(speaker.spoken_text, contains_string("Yes?"))
