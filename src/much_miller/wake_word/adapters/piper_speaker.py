@@ -30,11 +30,12 @@ class PiperSpeaker(SpeakerPort):
         Args:
             text: Text to speak
         """
-        audio_arrays: list[NDArray[np.float32]] = []
+        audio_segments: list[NDArray[np.int16]] = []
         for chunk in self._voice.synthesize(text):
-            audio_arrays.append(chunk.audio_float_array)
+            audio_segment = np.frombuffer(chunk.audio_int16_bytes, dtype=np.int16)
+            audio_segments.append(audio_segment)
 
-        if audio_arrays:
-            audio_data = np.concatenate(audio_arrays)
+        if audio_segments:
+            audio_data = np.concatenate(audio_segments)
             sd.play(audio_data, samplerate=self._voice.config.sample_rate)
             sd.wait()
