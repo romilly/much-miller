@@ -49,6 +49,7 @@ def run(
     transcriber: TranscriberPort,
     speaker: SpeakerPort | None = None,
     voice_detector: VoiceDetectorPort | None = None,
+    duration_seconds: float = 2.0,
 ) -> None:
     """Run the wake word detection loop.
 
@@ -57,12 +58,17 @@ def run(
         transcriber: Speech-to-text transcriber adapter
         speaker: Optional speaker for TTS response
         voice_detector: Optional VAD to skip silent audio
+        duration_seconds: Duration of each audio chunk to record
     """
     print("Listening for 'figaro'...")
     try:
         while True:
             if process_audio_chunk(
-                recorder, transcriber, speaker=speaker, voice_detector=voice_detector
+                recorder,
+                transcriber,
+                duration_seconds=duration_seconds,
+                speaker=speaker,
+                voice_detector=voice_detector,
             ):
                 print("Wake word detected!")
     except KeyboardInterrupt:
@@ -85,8 +91,15 @@ if __name__ == "__main__":
     load_dotenv()
     model_path = Path(os.environ["MUCH_MILLER_MODEL_PATH"])
     transcriber_url = os.environ.get("MUCH_MILLER_TRANSCRIBER_URL", "http://localhost:8765")
+    record_duration = float(os.environ.get("MUCH_MILLER_RECORD_DURATION", "2.0"))
     recorder = SoundDeviceRecorder(device=1)
     transcriber = HttpTranscriber(base_url=transcriber_url)
     speaker = PiperSpeaker(model_path=model_path)
     voice_detector = WebRtcVoiceDetector()
-    run(recorder, transcriber, speaker=speaker, voice_detector=voice_detector)
+    run(
+        recorder,
+        transcriber,
+        speaker=speaker,
+        voice_detector=voice_detector,
+        duration_seconds=record_duration,
+    )
