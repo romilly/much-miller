@@ -5,7 +5,7 @@ Flow:
 1. Listen for wake word (using openWakeWord)
 2. Say "Hello Romilly" via TTS
 3. Switch to transcription mode (RealtimeSTT)
-4. Print transcriptions
+4. Handle commands (e.g., "play radio 3")
 5. When transcription ends with "over", return to wake word listening
 """
 
@@ -23,6 +23,8 @@ from dotenv import load_dotenv
 from openwakeword.model import Model as WakeWordModel
 from RealtimeSTT import AudioToTextRecorder
 
+from much_miller.radio.adapters import BBCRadioPlayer
+from much_miller.radio.ports import RadioPlayerPort
 from much_miller.wake_word.adapters import PiperSpeaker
 from much_miller.wake_word.ports import SpeakerPort
 
@@ -32,6 +34,72 @@ CHANNELS = 1
 RATE = 16000
 WAKE_WORD_THRESHOLD = 0.5
 END_KEYWORD = "over"
+
+# Station name mappings (spoken phrase -> BBC station ID)
+STATIONS = {
+    "radio 3": "bbc_radio_three",
+    "radio three": "bbc_radio_three",
+    "radio 4": "bbc_radio_fourfm",
+    "radio four": "bbc_radio_fourfm",
+    "radio for": "bbc_radio_fourfm",  # common mishearing
+    "world service": "bbc_world_service",
+    "news": "bbc_sounds_news",
+    "bbc news": "bbc_sounds_news",
+}
+
+
+def parse_station(text: str) -> tuple[str, str] | None:
+    """Extract station ID from command text.
+
+    Returns (station_id, display_name) or None if no station found.
+    """
+    text_lower = text.lower()
+    for name, station_id in STATIONS.items():
+        if name in text_lower:
+            return station_id, name
+    return None
+
+
+def handle_command(
+    text: str,
+    radio: RadioPlayerPort,
+    speaker: SpeakerPort | None,
+) -> bool:
+    """Handle a voice command.
+
+    Returns True if command was recognised and handled.
+    """
+    text_lower = text.lower().strip()
+
+    # Play command
+    if text_lower.startswith("play"):
+        station = parse_station(text_lower)
+        if station:
+            station_id, station_name = station
+            radio.play(station_id, station_name)
+            if speaker:
+                speaker.say(f"Playing {station_name}")
+            else:
+                print(f"[Playing {station_name}]")
+            return True
+        else:
+            if speaker:
+                speaker.say("I don't know that station")
+            else:
+                print("[Unknown station]")
+            return True
+
+    # Stop command
+    if text_lower.startswith("stop"):
+        if radio.is_playing():
+            radio.stop()
+            if speaker:
+                speaker.say("Stopped")
+            else:
+                print("[Stopped]")
+        return True
+
+    return False
 
 
 def find_device_by_name(name: str) -> int | None:
@@ -85,7 +153,11 @@ def listen_for_wake_word(
     return detected_word
 
 
-def transcribe_until_over(device_index: int) -> None:
+def transcribe_until_over(
+    device_index: int,
+    radio: RadioPlayerPort,
+    speaker: SpeakerPort | None,
+) -> None:
     """Transcribe speech until user says 'over'."""
     recorder = AudioToTextRecorder(
         model="small",
@@ -103,9 +175,14 @@ def transcribe_until_over(device_index: int) -> None:
                 text = text.strip()
                 print(f">>> {text}")
 
+                # Check for end keyword
                 if text.lower().endswith(END_KEYWORD):
                     print("\n[Heard 'over' - returning to wake word mode]\n")
                     break
+
+                # Try to handle as command
+                handle_command(text, radio, speaker)
+
     finally:
         recorder.shutdown()
 
@@ -140,6 +217,9 @@ def main() -> None:
     device_info = sd.query_devices(device_index)
     print(f"Using device: [{device_index}] {device_info['name']}\n")
 
+    # Initialize radio player
+    radio: RadioPlayerPort = BBCRadioPlayer()
+
     # Initialize TTS speaker
     speaker: SpeakerPort | None = None
     model_path_str = os.environ.get("MUCH_MILLER_MODEL_PATH")
@@ -162,6 +242,7 @@ def main() -> None:
     print("=" * 50)
     print("Much Miller ready!")
     print(f"Say a wake word to start: {', '.join(wake_words)}")
+    print("Commands: 'play radio 3', 'play radio 4', 'play news', 'stop'")
     print("Say 'over' to return to wake word listening")
     print("Ctrl+C to quit")
     print("=" * 50 + "\n")
@@ -177,10 +258,11 @@ def main() -> None:
             if speaker is not None:
                 speaker.say("Hello Romilly")
 
-            # Phase 3: Transcribe until "over"
-            transcribe_until_over(device_index)
+            # Phase 3: Transcribe and handle commands until "over"
+            transcribe_until_over(device_index, radio, speaker)
 
     except KeyboardInterrupt:
+        radio.stop()
         print("\nGoodbye!")
 
 

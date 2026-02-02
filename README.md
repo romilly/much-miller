@@ -10,9 +10,8 @@ The core voice loop is now functional:
 1. **Wake word detection** - openWakeWord (listens for "hey jarvis", "alexa", etc.)
 2. **TTS response** - Piper says "Hello Romilly"
 3. **Speech transcription** - RealtimeSTT with faster-whisper
-4. **End keyword** - Say "over" to return to wake word listening
-
-Custom wake word ("hey much") training is in progress.
+4. **Voice commands** - "play radio 3", "play radio 4", "play news", "stop"
+5. **End keyword** - Say "over" to return to wake word listening
 
 ## Quick Start
 
@@ -48,9 +47,9 @@ python -m much_miller.main
 ┌─────────────────────────────────────────────────────────────┐
 │                     much-miller (trend)                      │
 ├─────────────────────────────────────────────────────────────┤
-│  openWakeWord          RealtimeSTT           Piper TTS      │
-│  (wake word detection) (faster-whisper)      (speech out)   │
-│                        CPU inference                         │
+│  openWakeWord    RealtimeSTT      Piper TTS    BBC Radio    │
+│  (wake word)     (faster-whisper) (speech out) (mpv streams)│
+│                  CPU inference                               │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -61,6 +60,7 @@ python -m much_miller.main
 | Wake word | openWakeWord | Lightweight, runs on CPU, multiple wake words |
 | Transcription | RealtimeSTT + faster-whisper | Real-time STT with VAD |
 | TTS | Piper | Fast local text-to-speech |
+| Radio | mpv | BBC radio streaming via HLS |
 | Audio | sounddevice + PyAudio | Device enumeration and capture |
 
 ## Dependencies
@@ -77,7 +77,13 @@ pyaudio           # Audio capture for openWakeWord
 
 ```
 src/much_miller/
-├── main.py                 # Main entry point - wake word + transcription loop
+├── main.py                 # Main entry point - wake word + transcription + commands
+├── radio/
+│   ├── ports/              # Abstract interfaces
+│   │   └── radio_player.py
+│   └── adapters/           # Implementations
+│       ├── bbc_radio_player.py
+│       └── fake_radio_player.py
 └── wake_word/
     ├── ports/              # Abstract interfaces
     │   ├── audio_recorder.py
@@ -114,12 +120,12 @@ See `docs/much-rearchitecture-plan.md` for the full architecture plan.
 - [x] Test openWakeWord
 - [x] Clean up old VAD-based code
 - [x] Working main.py with wake word → TTS → transcription → "over" loop
+- [x] BBC Radio control (play/stop Radio 3, Radio 4, World Service, News)
 
 ### Next Steps
-- [ ] Train custom "hey much" wake word
+- [ ] Train custom "hey much" wake word (blocked: openWakeWord training broken for Python 3.12)
 - [ ] Build transcription-service (FastAPI on polwarth)
 - [ ] Add intent routing (Claude API)
-- [ ] Music/radio control integration
 
 ## Related Projects
 
@@ -137,4 +143,4 @@ See `docs/much-rearchitecture-plan.md` for the full architecture plan.
 
 ---
 
-*Updated 2 February 2026*
+*Updated 2 February 2026 - Radio control added*
