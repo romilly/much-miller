@@ -1,11 +1,12 @@
 # Production dependencies
 sounddevice
 numpy
-httpx
 scipy
 matplotlib
 piper-tts
 python-dotenv
-webrtcvad
+openwakeword
+RealtimeSTT
+pyaudio
 
 # Development dependencies are in requirements-test.txt

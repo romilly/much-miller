@@ -1,8 +1,9 @@
 """Port definitions (abstract base classes) for wake word detection."""
 
-from much_miller.wake_word.ports.transcriber import TranscriberPort
 from much_miller.wake_word.ports.audio_recorder import AudioRecorderPort
 from much_miller.wake_word.ports.speaker import SpeakerPort
-from much_miller.wake_word.ports.voice_detector import VoiceDetectorPort
 
-__all__ = ["TranscriberPort", "AudioRecorderPort", "SpeakerPort", "VoiceDetectorPort"]
+__all__ = [
+    "AudioRecorderPort",
+    "SpeakerPort",
+]
